@@ -4,18 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #registration, #login {
+            display: none;
+        }
+        #deleteButton {
+            margin-top: 10px; /* Add space above the delete button */
+        }
+    </style>
 </head>
 <body>
     <h1>Device Registration System</h1>
-    <div id="registration" style="display: none;">
+    <div id="registration">
         <h2>Create Account</h2>
-        <input type="text" id="username" placeholder="Enter your username">
-        <input type="password" id="pin" placeholder="Enter your PIN">
+        <input type="text" id="username" placeholder="Enter your username" />
+        <input type="password" id="pin" placeholder="Enter your PIN" />
         <button id="registerButton">Register</button>
     </div>
-    <div id="login" style="display: none;">
+    <div id="login">
         <h2>Login</h2>
-        <input type="password" id="loginPin" placeholder="Enter your PIN">
+        <input type="password" id="loginPin" placeholder="Enter your PIN" />
         <button id="loginButton">Login</button>
         <button id="deleteButton" style="display: none;">Delete Account</button>
     </div>

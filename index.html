@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIN Authentication Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        input { margin: 10px 0; padding: 10px; }
+        button { padding: 10px; }
+        #pin-section, #auth-section { display: none; }
+    </style>
+</head>
+<body>
+
+<h1>Account Registration and Device Authentication</h1>
+
+<!-- Registration Form -->
+<div id="register-section">
+    <h2>Create Account</h2>
+    <input type="text" id="username" placeholder="Enter username">
+    <button onclick="registerUser()">Register</button>
+</div>
+
+<!-- PIN Setup Section -->
+<div id="pin-section">
+    <h2>Setup PIN</h2>
+    <input type="password" id="pin" placeholder="Enter a PIN">
+    <button onclick="setupPIN()">Set PIN</button>
+</div>
+
+<!-- Authentication Section -->
+<div id="auth-section">
+    <h2>Login</h2>
+    <input type="password" id="login-pin" placeholder="Enter your PIN">
+    <button onclick="authenticate()">Login</button>
+    <p id="auth-status"></p>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -19,13 +19,15 @@ function checkDeviceRegistration() {
         document.getElementById('loginButton').onclick = function() {
             authenticateUser(username);
         };
-        document.getElementById('deleteButton').style.display = 'none'; // Initially hide the delete button
+        document.getElementById('deleteButton').style.display = 'block'; // Show the delete button
+        document.getElementById('registration').style.display = 'none'; // Hide registration
     } else {
         // Device not registered, show registration
         document.getElementById('registration').style.display = 'block';
         document.getElementById('registerButton').onclick = function() {
             registerDevice();
         };
+        document.getElementById('login').style.display = 'none'; // Hide login
     }
 }
 

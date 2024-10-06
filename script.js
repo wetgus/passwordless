@@ -19,7 +19,7 @@ function checkDeviceRegistration() {
         document.getElementById('loginButton').onclick = function() {
             authenticateUser(username);
         };
-        document.getElementById('deleteButton').style.display = 'block'; // Show the delete button
+        document.getElementById('deleteButton').style.display = 'none'; // Hide the delete button initially
         document.getElementById('registration').style.display = 'none'; // Hide registration
     } else {
         // Device not registered, show registration
@@ -85,3 +85,6 @@ document.getElementById('deleteButton').onclick = function() {
     const username = localStorage.getItem('currentUser');
     deleteAccount(username);
 };
+
+// Ensure the delete button is hidden on initial load
+document.getElementById('deleteButton').style.display = 'none';

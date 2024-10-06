@@ -19,6 +19,10 @@ function checkDeviceRegistration() {
         document.getElementById('loginButton').onclick = function() {
             authenticateUser(username);
         };
+        document.getElementById('deleteButton').style.display = 'block';
+        document.getElementById('deleteButton').onclick = function() {
+            deleteAccount(username);
+        };
     } else {
         // Device not registered, show registration
         document.getElementById('registration').style.display = 'block';
@@ -58,5 +62,20 @@ function authenticateUser(username) {
         alert('Login successful!');
     } else {
         alert('Invalid PIN. Please try again.');
+    }
+}
+
+// Function to delete the user's account
+function deleteAccount(username) {
+    let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
+    
+    if (userDB[username]) {
+        delete userDB[username];
+        localStorage.setItem('userDB', JSON.stringify(userDB));
+        localStorage.removeItem('currentUser');
+        alert('Account deleted successfully.');
+        checkDeviceRegistration(); // Refresh the UI
+    } else {
+        alert('User not found.');
     }
 }

@@ -1,11 +1,36 @@
-// Function to generate a random token
-function generateToken() {
-    return Math.random().toString(36).substr(2, 10);
+// Gmail SMTP settings
+const smtpSettings = {
+    user: 'your-email@gmail.com',
+    pass: 'your-app-password', // App password from Gmail for SMTP
+};
+
+// Function to send email using Gmail SMTP
+function sendEmail(to, subject, message) {
+    Email.send({
+        Host: "smtp.gmail.com",
+        Username: smtpSettings.user,
+        Password: smtpSettings.pass,
+        To: to,
+        From: smtpSettings.user,
+        Subject: subject,
+        Body: message,
+    }).then(
+        message => alert('Email sent successfully')
+    ).catch(err => alert('Failed to send email: ' + err));
 }
 
-// Function to hash the PIN (simple hash for demonstration)
-function hashPin(pin) {
-    return btoa(pin); // Base64 encode for simplicity
+// OTP management
+let generatedOTP;
+
+// Function to generate OTP
+function generateOtp() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Function to validate email
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 
 // Function to check device registration
@@ -14,77 +39,83 @@ function checkDeviceRegistration() {
     const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
 
     if (username && userDB[username]) {
-        // Device is registered, show login
         document.getElementById('login').style.display = 'block';
-        document.getElementById('loginButton').onclick = function() {
-            authenticateUser(username);
-        };
-        document.getElementById('deleteButton').style.display = 'none'; // Hide the delete button initially
-        document.getElementById('registration').style.display = 'none'; // Hide registration
+        document.getElementById('registration').style.display = 'none';
+        document.getElementById('deleteButton').style.display = 'none'; // Hidden initially
     } else {
-        // Device not registered, show registration
         document.getElementById('registration').style.display = 'block';
-        document.getElementById('registerButton').onclick = function() {
-            registerDevice();
-        };
-        document.getElementById('login').style.display = 'none'; // Hide login
+        document.getElementById('login').style.display = 'none';
     }
 }
 
-// Function to register a device
+// Register new user
 function registerDevice() {
-    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
     const pin = document.getElementById('pin').value;
 
+    if (!validateEmail(email)) {
+        alert('Please enter a valid email.');
+        return;
+    }
+
     let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
     
-    if (userDB[username]) {
-        alert('User already exists. Please log in.');
+    if (userDB[email]) {
+        alert('Account already exists. Please log in.');
     } else {
-        // Generate a new token and hash the PIN
-        let token = generateToken();
-        let pinHash = hashPin(pin);
-        userDB[username] = { token: token, pinHash: pinHash };
+        const token = generateToken();
+        const pinHash = hashPin(pin);
+        userDB[email] = { token: token, pinHash: pinHash, devices: [token] };
         localStorage.setItem('userDB', JSON.stringify(userDB));
-        localStorage.setItem('currentUser', username);
+        localStorage.setItem('currentUser', email);
         alert('Registration successful!');
-        checkDeviceRegistration(); // Refresh the UI
+        checkDeviceRegistration();
     }
 }
 
-// Function to authenticate the user
-function authenticateUser(username) {
-    const loginPin = document.getElementById('loginPin').value;
+// Send OTP
+function sendOtp() {
+    const email = document.getElementById('loginEmail').value;
     let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
 
-    if (userDB[username] && userDB[username].pinHash === hashPin(loginPin)) {
-        alert('Login successful!');
-        document.getElementById('deleteButton').style.display = 'block'; // Show the delete button after successful login
+    if (userDB[email]) {
+        generatedOTP = generateOtp();
+        sendEmail(email, 'Your OTP Code', `Your OTP code is: ${generatedOTP}`);
+        document.getElementById('otpSection').style.display = 'block';
     } else {
-        alert('Invalid PIN. Please try again.');
+        alert('Account not found.');
     }
 }
 
-// Function to delete the user's account
-function deleteAccount(username) {
+// Verify OTP and enroll device
+function verifyOtp() {
+    const enteredOtp = document.getElementById('otp').value;
+    const newPin = document.getElementById('newPin').value;
+    const email = document.getElementById('loginEmail').value;
+
     let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
-    
-    if (userDB[username]) {
-        delete userDB[username];
+
+    if (generatedOTP === enteredOtp) {
+        const token = generateToken();
+        const pinHash = hashPin(newPin);
+        userDB[email].devices.push(token);
+        userDB[email].pinHash = pinHash;  // Store different PIN per device
         localStorage.setItem('userDB', JSON.stringify(userDB));
-        localStorage.removeItem('currentUser');
-        alert('Account deleted successfully.');
-        checkDeviceRegistration(); // Refresh the UI
+        localStorage.setItem('currentUser', email);
+        alert('Device enrolled successfully!');
+        checkDeviceRegistration();
     } else {
-        alert('User not found.');
+        alert('Incorrect OTP.');
     }
 }
 
-// Event listener for the delete button
-document.getElementById('deleteButton').onclick = function() {
-    const username = localStorage.getItem('currentUser');
-    deleteAccount(username);
-};
+// Event Listeners
+document.getElementById('registerButton').addEventListener('click', registerDevice);
+document.getElementById('sendOtpButton').addEventListener('click', sendOtp);
+document.getElementById('verifyOtpButton').addEventListener('click', verifyOtp);
 
-// Ensure the delete button is hidden on initial load
+// Hide delete button initially
 document.getElementById('deleteButton').style.display = 'none';
+
+// Initial check for device registration
+checkDeviceRegistration();

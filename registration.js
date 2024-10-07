@@ -9,7 +9,11 @@ document.getElementById('register-button').addEventListener('click', function() 
         localStorage.setItem('deviceToken', generateToken());
         
         alert('Registration successful! Your device is enrolled.');
-        location.reload();
+        
+        // Automatically log in the user after registration
+        document.getElementById('registration-form').style.display = 'none';
+        document.getElementById('after-login-actions').style.display = 'block'; // Show account management options
+        
     } else {
         alert('Please enter a valid email and a 4-digit PIN.');
     }

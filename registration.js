@@ -1,29 +1,36 @@
-document.getElementById('register-button').addEventListener('click', function() {
+// registration.js
+
+function registerUser() {
     const email = document.getElementById('register-email').value;
     const pin = document.getElementById('register-pin').value;
 
-    if (validateEmail(email) && pin.length === 4) {
-        // Store the user details and device enrollment
-        localStorage.setItem('email', email);
-        localStorage.setItem('pin', btoa(pin));  // Encrypt the PIN
-        localStorage.setItem('deviceToken', generateToken());
-        
-        alert('Registration successful! Your device is enrolled.');
-        
-        // Automatically log in the user after registration
-        document.getElementById('registration-form').style.display = 'none';
-        document.getElementById('after-login-actions').style.display = 'block'; // Show account management options
-        
-    } else {
-        alert('Please enter a valid email and a 4-digit PIN.');
+    // Basic validation
+    if (!validateEmail(email)) {
+        alert('Please enter a valid email address.');
+        return;
     }
-});
 
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-}
+    if (pin.length < 4) {
+        alert('PIN must be at least 4 digits.');
+        return;
+    }
 
-function generateToken() {
-    return Math.random().toString(36).substr(2, 10);  // Simple token generator
+    // Send registration request to the server
+    fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, pin })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Automatically log in the user after registration
+            alert('Registration successful! Logging in...');
+            localStorage.setItem('token', data.token);
+            showAccountOptions(); // Update the UI to show the account options
+        } else {
+            alert('Registration failed: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }

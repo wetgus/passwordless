@@ -3,51 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Enrollment</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Device Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #registration, #login {
+            display: none;
+        }
+        #deleteButton {
+            margin-top: 10px; /* Add space above the delete button */
+        }
+    </style>
 </head>
 <body>
-    <div id="container">
-        <h1>Device Enrollment System</h1>
-
-        <!-- Register Dialog -->
-        <div id="register-dialog" style="display: none;">
-            <h2>Register</h2>
-            <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-pin" placeholder="PIN" required>
-            <button onclick="registerUser()">Register</button>
-        </div>
-
-        <!-- Login Dialog -->
-        <div id="login-dialog" style="display: none;">
-            <h2>Login</h2>
-            <input type="email" id="login-email" placeholder="Email" required>
-            <button onclick="loginUser()">Login</button>
-        </div>
-
-        <!-- OTP Dialog -->
-        <div id="otp-dialog" style="display: none;">
-            <h2>Enter OTP</h2>
-            <input type="text" id="otp-input" placeholder="Enter OTP" required>
-            <button onclick="verifyOtp()">Verify OTP</button>
-        </div>
-
-        <!-- Account Options -->
-        <div id="account-options" style="display: none;">
-            <h2>Account Options</h2>
-            <button onclick="deleteAccount()">Delete Account</button>
-            <button onclick="logout()">Logout</button>
-        </div>
+    <h1>Device Registration System</h1>
+    <div id="registration">
+        <h2>Create Account</h2>
+        <input type="text" id="username" placeholder="Enter your username" />
+        <input type="password" id="pin" placeholder="Enter your PIN" />
+        <button id="registerButton">Register</button>
+    </div>
+    <div id="login">
+        <h2>Login</h2>
+        <input type="password" id="loginPin" placeholder="Enter your PIN" />
+        <button id="loginButton">Login</button>
+        <button id="deleteButton" style="display: none;">Delete Account</button>
     </div>
 
-    <script src="registration.js"></script>
-    <script src="login.js"></script>
-    <script src="otp.js"></script>
-    <script src="visibility.js"></script>
-
+    <script src="script.js"></script>
     <script>
-        // Check enrollment status on page load
-        document.addEventListener('DOMContentLoaded', checkEnrollment);
+        window.onload = function() {
+            checkDeviceRegistration();
+        };
     </script>
 </body>
 </html>

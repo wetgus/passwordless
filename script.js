@@ -1,121 +1,156 @@
-// Gmail SMTP settings
-const smtpSettings = {
-    user: 'your-email@gmail.com',
-    pass: 'your-app-password', // App password from Gmail for SMTP
-};
+// Simulating a DB for storing user accounts
+let db = JSON.parse(localStorage.getItem('userDB')) || {};
+let generatedOtp = '';
+let currentUser = null; // Stores current logged-in user
 
-// Function to send email using Gmail SMTP
+// Validate email
+function validateEmail(email) {
+    const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return re.test(email);
+}
+
+// Send OTP using Gmail SMTP
 function sendEmail(to, subject, message) {
     Email.send({
         Host: "smtp.gmail.com",
-        Username: smtpSettings.user,
-        Password: smtpSettings.pass,
+        Username: "your-email@gmail.com",
+        Password: "your-app-password",
         To: to,
-        From: smtpSettings.user,
+        From: "your-email@gmail.com",
         Subject: subject,
         Body: message,
     }).then(
-        message => alert('Email sent successfully')
-    ).catch(err => alert('Failed to send email: ' + err));
+        () => alert("OTP sent successfully")
+    ).catch(err => alert('Failed to send OTP: ' + err));
 }
 
-// OTP management
-let generatedOTP;
-
-// Function to generate OTP
-function generateOtp() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-// Function to validate email
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Function to check device registration
-function checkDeviceRegistration() {
-    const username = localStorage.getItem('currentUser');
-    const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
-
-    if (username && userDB[username]) {
-        document.getElementById('login').style.display = 'block';
-        document.getElementById('registration').style.display = 'none';
-        document.getElementById('deleteButton').style.display = 'none'; // Hidden initially
-    } else {
-        document.getElementById('registration').style.display = 'block';
-        document.getElementById('login').style.display = 'none';
-    }
-}
-
-// Register new user
-function registerDevice() {
-    const email = document.getElementById('email').value;
-    const pin = document.getElementById('pin').value;
+// Registration function
+function register() {
+    const email = document.getElementById('registerEmail').value;
+    const pin = document.getElementById('registerPin').value;
 
     if (!validateEmail(email)) {
-        alert('Please enter a valid email.');
+        alert('Please enter a valid email address');
         return;
     }
 
-    let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
-    
-    if (userDB[email]) {
-        alert('Account already exists. Please log in.');
-    } else {
-        const token = generateToken();
-        const pinHash = hashPin(pin);
-        userDB[email] = { token: token, pinHash: pinHash, devices: [token] };
-        localStorage.setItem('userDB', JSON.stringify(userDB));
-        localStorage.setItem('currentUser', email);
-        alert('Registration successful!');
-        checkDeviceRegistration();
+    if (!pin) {
+        alert('Please enter a PIN');
+        return;
     }
+
+    if (db[email]) {
+        alert('Account with this email already exists. Please login.');
+        return;
+    }
+
+    // Register user in the DB
+    db[email] = {
+        pinHash: btoa(pin), // Hashing PIN for simplicity
+        devices: [generateToken()],
+    };
+    localStorage.setItem('userDB', JSON.stringify(db));
+
+    alert('Account created successfully!');
+    location.reload();
 }
 
-// Send OTP
-function sendOtp() {
+// Login function
+function login() {
     const email = document.getElementById('loginEmail').value;
-    let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
+    const pin = document.getElementById('loginPin').value;
 
-    if (userDB[email]) {
-        generatedOTP = generateOtp();
-        sendEmail(email, 'Your OTP Code', `Your OTP code is: ${generatedOTP}`);
-        document.getElementById('otpSection').style.display = 'block';
+    if (!validateEmail(email) || !db[email]) {
+        alert('No account found with this email.');
+        return;
+    }
+
+    if (btoa(pin) !== db[email].pinHash) {
+        alert('Incorrect PIN.');
+        return;
+    }
+
+    currentUser = email;
+
+    if (db[email].devices.includes(getDeviceToken())) {
+        alert('Login successful!');
+        showDeleteButton();
     } else {
-        alert('Account not found.');
+        // If new device, send OTP to email
+        generatedOtp = generateOtp();
+        sendEmail(email, 'Your OTP Code', `Your OTP code is: ${generatedOtp}`);
+        document.getElementById('otp-form').classList.remove('hidden');
+        document.getElementById('login-form').classList.add('hidden');
     }
 }
 
-// Verify OTP and enroll device
+// Verify OTP for new device enrollment
 function verifyOtp() {
-    const enteredOtp = document.getElementById('otp').value;
-    const newPin = document.getElementById('newPin').value;
-    const email = document.getElementById('loginEmail').value;
+    const otpInput = document.getElementById('otpInput').value;
 
-    let userDB = JSON.parse(localStorage.getItem('userDB')) || {};
+    if (otpInput === generatedOtp) {
+        // Enroll device
+        db[currentUser].devices.push(generateToken());
+        localStorage.setItem('userDB', JSON.stringify(db));
 
-    if (generatedOTP === enteredOtp) {
-        const token = generateToken();
-        const pinHash = hashPin(newPin);
-        userDB[email].devices.push(token);
-        userDB[email].pinHash = pinHash;  // Store different PIN per device
-        localStorage.setItem('userDB', JSON.stringify(userDB));
-        localStorage.setItem('currentUser', email);
         alert('Device enrolled successfully!');
-        checkDeviceRegistration();
+        showDeleteButton();
+        document.getElementById('otp-form').classList.add('hidden');
     } else {
         alert('Incorrect OTP.');
     }
 }
 
-// Event Listeners
-document.getElementById('registerButton').addEventListener('click', registerDevice);
-document.getElementById('sendOtpButton').addEventListener('click', sendOtp);
-document.getElementById('verifyOtpButton').addEventListener('click', verifyOtp);
+// Delete account function
+function deleteAccount() {
+    delete db[currentUser];
+    localStorage.setItem('userDB', JSON.stringify(db));
 
-// Hide delete button initially
-document.getElementById('deleteButton').style.display = 'none';
+    alert('Account deleted successfully.');
+    location.reload();
+}
 
-// Initial check for device registration
-checkDeviceRegistration();
+// Helper functions
+function generateToken() {
+    return Math.random().toString(36).substring(2, 12);
+}
+
+function getDeviceToken() {
+    let token = localStorage.getItem('deviceToken');
+    if (!token) {
+        token = generateToken();
+        localStorage.setItem('deviceToken', token);
+    }
+    return token;
+}
+
+function generateOtp() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Show or hide forms based on device enrollment
+function init() {
+    const deviceToken = getDeviceToken();
+    let isDeviceEnrolled = false;
+
+    for (const email in db) {
+        if (db[email].devices.includes(deviceToken)) {
+            isDeviceEnrolled = true;
+            break;
+        }
+    }
+
+    if (isDeviceEnrolled) {
+        document.getElementById('login-form').classList.remove('hidden');
+    } else {
+        document.getElementById('register-form').classList.remove('hidden');
+    }
+}
+
+// Show delete button after login
+function showDeleteButton() {
+    document.getElementById('delete-account').classList.remove('hidden');
+}
+
+// Initialize the app
+init();

@@ -1,18 +1,23 @@
-document.getElementById('verify-otp-button').addEventListener('click', function() {
-    const enteredOtp = document.getElementById('otp-input').value;
-    const storedOtp = localStorage.getItem('otp');
+// otp.js
 
-    if (enteredOtp === storedOtp) {
-        const newPin = prompt('Enter a new 4-digit PIN for this device:');
-        if (newPin.length === 4) {
-            localStorage.setItem('pin', btoa(newPin));
-            localStorage.setItem('deviceToken', generateToken());  // Enroll the new device
-            alert('Device enrolled successfully.');
-            location.reload();
+function verifyOtp() {
+    const otp = document.getElementById('otp-input').value;
+
+    // Send OTP verification request to the server
+    fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Device enrolled successfully!');
+            localStorage.setItem('token', data.token);
+            showAccountOptions(); // Update UI to show account options
         } else {
-            alert('PIN must be 4 digits.');
+            alert('OTP verification failed: ' + data.message);
         }
-    } else {
-        alert('Invalid OTP!');
-    }
-});
+    })
+    .catch(error => console.error('Error:', error));
+}

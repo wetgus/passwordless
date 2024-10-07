@@ -3,47 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Device Authentication</title>
+    <title>User Registration & Device Authentication</title>
     <style>
-        /* Add some basic styling */
-        .hidden { display: none; }
-        #register-form, #login-form, #otp-form { margin: 20px; }
-        .input-field { margin-bottom: 10px; }
-        #delete-btn { margin-top: 20px; position: relative; left: 0; }
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+        input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #delete-account, #logout {
+            margin-top: 20px;
+        }
     </style>
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
-    <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Welcome to Multi-Device Authentication System</h1>
 
-    <!-- Registration form -->
     <div id="register-form" class="hidden">
         <h2>Register</h2>
-        <input type="email" id="registerEmail" class="input-field" placeholder="Enter your email" required>
-        <input type="password" id="registerPin" class="input-field" placeholder="Enter PIN" required>
+        <input type="email" id="registerEmail" placeholder="Enter your email" />
+        <input type="password" id="registerPin" placeholder="Enter a PIN" />
         <button onclick="register()">Register</button>
     </div>
 
-    <!-- Login form -->
     <div id="login-form" class="hidden">
         <h2>Login</h2>
-        <input type="email" id="loginEmail" class="input-field" placeholder="Enter your email" required>
-        <input type="password" id="loginPin" class="input-field" placeholder="Enter PIN" required>
+        <input type="email" id="loginEmail" placeholder="Enter your email" />
+        <input type="password" id="loginPin" placeholder="Enter your PIN" />
         <button onclick="login()">Login</button>
     </div>
 
-    <!-- OTP Form (for enrolling new devices) -->
     <div id="otp-form" class="hidden">
         <h2>Enter OTP</h2>
-        <input type="text" id="otpInput" class="input-field" placeholder="Enter OTP" required>
+        <input type="text" id="otpInput" placeholder="Enter OTP" />
         <button onclick="verifyOtp()">Verify OTP</button>
     </div>
 
-    <!-- Delete account button (Visible after login) -->
     <div id="delete-account" class="hidden">
-        <button id="delete-btn" onclick="deleteAccount()">Delete Account</button>
+        <button onclick="deleteAccount()">Delete Account</button>
     </div>
 
+    <div id="logout" class="hidden">
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

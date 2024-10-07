@@ -45,14 +45,17 @@ function register() {
     }
 
     // Register user in the DB
+    const deviceToken = generateToken();
     db[email] = {
         pinHash: btoa(pin), // Hashing PIN for simplicity
-        devices: [generateToken()],
+        devices: [deviceToken],
     };
     localStorage.setItem('userDB', JSON.stringify(db));
+    localStorage.setItem('deviceToken', deviceToken);  // Save the token for the current device
 
     alert('Account created successfully!');
-    location.reload();
+    currentUser = email;  // Set the current user as logged in
+    showPostRegistrationUI();  // Show Delete and Logout
 }
 
 // Login function
@@ -74,7 +77,7 @@ function login() {
 
     if (db[email].devices.includes(getDeviceToken())) {
         alert('Login successful!');
-        showDeleteButton();
+        showPostRegistrationUI();
     } else {
         // If new device, send OTP to email
         generatedOtp = generateOtp();
@@ -94,7 +97,7 @@ function verifyOtp() {
         localStorage.setItem('userDB', JSON.stringify(db));
 
         alert('Device enrolled successfully!');
-        showDeleteButton();
+        showPostRegistrationUI();
         document.getElementById('otp-form').classList.add('hidden');
     } else {
         alert('Incorrect OTP.');
@@ -107,7 +110,14 @@ function deleteAccount() {
     localStorage.setItem('userDB', JSON.stringify(db));
 
     alert('Account deleted successfully.');
-    location.reload();
+    logout();  // Call logout function to redirect to Register
+}
+
+// Logout function
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('deviceToken');  // Clear the device token
+    location.reload();  // Reload the page to show registration form
 }
 
 // Helper functions
@@ -116,16 +126,19 @@ function generateToken() {
 }
 
 function getDeviceToken() {
-    let token = localStorage.getItem('deviceToken');
-    if (!token) {
-        token = generateToken();
-        localStorage.setItem('deviceToken', token);
-    }
-    return token;
+    return localStorage.getItem('deviceToken');
 }
 
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Show UI after registration/login
+function showPostRegistrationUI() {
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('delete-account').classList.remove('hidden');
+    document.getElementById('logout').classList.remove('hidden');
 }
 
 // Show or hide forms based on device enrollment
@@ -136,20 +149,16 @@ function init() {
     for (const email in db) {
         if (db[email].devices.includes(deviceToken)) {
             isDeviceEnrolled = true;
+            currentUser = email;  // Auto-login if device is recognized
             break;
         }
     }
 
     if (isDeviceEnrolled) {
-        document.getElementById('login-form').classList.remove('hidden');
+        showPostRegistrationUI();  // Show logged-in view
     } else {
         document.getElementById('register-form').classList.remove('hidden');
     }
-}
-
-// Show delete button after login
-function showDeleteButton() {
-    document.getElementById('delete-account').classList.remove('hidden');
 }
 
 // Initialize the app
